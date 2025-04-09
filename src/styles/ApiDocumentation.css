@@ -1,0 +1,151 @@
+.api-documentation {
+}
+
+.api-documentation h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 28px;
+}
+
+.api-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.api-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.api-card-header {
+  background-color: #f8fafc;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.api-card-header h3 {
+  margin: 0;
+  color: #2563eb;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.api-card-body {
+  padding: 20px 24px;
+  color: #334155;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.api-card-body p {
+  margin: 0 0 12px;
+}
+
+.api-card-body p:last-child {
+  margin-bottom: 0;
+}
+
+.function-signature {
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 6px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  overflow-x: auto;
+}
+
+.function-signature code {
+  font-size: 15px;
+  color: #1e40af;
+}
+
+.parameter {
+  margin-bottom: 16px;
+}
+
+.param-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.param-name {
+  font-weight: bold;
+  color: #1e293b;
+  font-size: 18px;
+  padding: 4px 10px;
+  background-color: #e0f2fe;
+  border-radius: 6px;
+}
+
+.param-type {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  color: #475569;
+  font-size: 14px;
+  padding: 4px 8px;
+  background-color: #f8fafc;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.param-desc {
+  padding-left: 10px;
+  border-left: 3px solid #e2e8f0;
+  line-height: 1.6;
+}
+
+.param-note {
+  display: inline-block;
+  margin-top: 8px;
+  font-style: italic;
+  color: #64748b;
+}
+
+.code-example {
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  margin: 0;
+}
+
+.code-example code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.features-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  padding: 12px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.features-list li:last-child {
+  border-bottom: none;
+}
+
+.feature-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.feature-text {
+  line-height: 1.5;
+} 

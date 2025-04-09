@@ -2,10 +2,15 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { SyncScrollDemo } from './components/SyncScrollDemo'
+import ApiDocumentation from './components/ApiDocumentation'
 import './App.css'
 
+// Тип для страниц
+type Page = 'demo' | 'documentation';
+
 function App() {
-  const [showDemo, setShowDemo] = useState(true)
+  // Состояние для текущей страницы
+  const [currentPage, setCurrentPage] = useState<Page>('demo')
 
   return (
     <div className="app-container">
@@ -20,81 +25,28 @@ function App() {
         </div>
         <h1>useSyncScroll Hook</h1>
         <p className="subtitle">
-          Хук для синхронизации скроллинга между несколькими контейнерами
+          Хук <code>useSyncScroll</code> обеспечивает плавную синхронизацию скроллинга между
+          элементами разных размеров как по горизонтальной, так и по вертикальной оси.
         </p>
       </header>
 
       <main>
         <div className="demo-controls">
           <button 
-            className={`toggle-button ${showDemo ? 'active' : ''}`} 
-            onClick={() => setShowDemo(true)}
+            className={`toggle-button ${currentPage === 'demo' ? 'active' : ''}`} 
+            onClick={() => setCurrentPage('demo')}
           >
             Показать демо
           </button>
           <button 
-            className={`toggle-button ${!showDemo ? 'active' : ''}`} 
-            onClick={() => setShowDemo(false)}
+            className={`toggle-button ${currentPage === 'documentation' ? 'active' : ''}`} 
+            onClick={() => setCurrentPage('documentation')}
           >
-            Информация об API
+            Документация API
           </button>
         </div>
 
-        {showDemo ? (
-          <SyncScrollDemo />
-        ) : (
-          <div className="api-info">
-            <h2>API хука useSyncScroll</h2>
-            <div className="api-details">
-              <h3>Использование</h3>
-              <pre>
-                <code>{`import { useRef } from 'react';
-import { useSyncScroll } from './hooks/useSyncScroll';
-
-function MyComponent() {
-  // Создаем рефы для каждого контейнера
-  const containerRef1 = useRef<HTMLDivElement>(null);
-  const containerRef2 = useRef<HTMLDivElement>(null);
-  
-  // Используем хук для синхронизации скроллинга
-  useSyncScroll([containerRef1, containerRef2]);
-  
-  return (
-    <div>
-      <div className="container" ref={containerRef1}>
-        {/* Содержимое первого контейнера */}
-      </div>
-      <div className="container" ref={containerRef2}>
-        {/* Содержимое второго контейнера */}
-      </div>
-    </div>
-  );
-}`}</code>
-              </pre>
-
-              <h3>Параметры</h3>
-              <div className="parameters">
-                <div className="parameter">
-                  <span className="param-name">refs</span>
-                  <span className="param-type">React.RefObject&lt;HTMLElement | Element&gt;[]</span>
-                  <span className="param-desc">
-                    Массив ссылок на DOM-элементы, скроллинг которых требуется синхронизировать. 
-                    Можно передавать любое количество контейнеров.
-                  </span>
-                </div>
-              </div>
-
-              <h3>Особенности</h3>
-              <ul className="features">
-                <li>Синхронизация как по оси X, так и по оси Y</li>
-                <li>Поддержка контейнеров с разными размерами</li>
-                <li>Плавная синхронизация без "дерганий"</li>
-                <li>Оптимизированная производительность с использованием throttling</li>
-                <li>Предотвращение рекурсивных вызовов обработчиков событий</li>
-              </ul>
-            </div>
-          </div>
-        )}
+        {currentPage === 'demo' ? <SyncScrollDemo /> : <ApiDocumentation />}
       </main>
 
       <footer className="app-footer">

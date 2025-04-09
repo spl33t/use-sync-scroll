@@ -32,14 +32,6 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
 .app-container {
   display: flex;
   flex-direction: column;
@@ -53,6 +45,9 @@
   text-align: center;
   background-color: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .logos {
@@ -81,11 +76,13 @@
 .subtitle {
   color: #6c757d;
   margin-top: 0.5rem;
+  max-width: 500px;
 }
 
 main {
+  max-width: 1200px;
+  margin: 0 auto 40px;
   padding: 2rem;
-  flex: 1;
 }
 
 .demo-controls {
@@ -116,102 +113,6 @@ main {
   border-color: #3498db;
 }
 
-.api-info {
-  max-width: 900px;
-  margin: 0 auto;
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.api-info h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #333;
-}
-
-.api-details {
-  padding: 1rem;
-}
-
-.api-details h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  color: #3498db;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 0.5rem;
-}
-
-.api-details pre {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 4px;
-  overflow-x: auto;
-}
-
-.api-details code {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 0.9rem;
-  color: #333;
-  line-height: 1.5;
-}
-
-.parameters {
-  margin-top: 1rem;
-}
-
-.parameter {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  grid-template-rows: auto auto;
-  gap: 0.5rem 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
-}
-
-.param-name {
-  font-weight: bold;
-  color: #333;
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.param-type {
-  color: #e74c3c;
-  font-family: monospace;
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.param-desc {
-  grid-column: 1 / span 2;
-  grid-row: 2;
-  color: #666;
-  line-height: 1.4;
-}
-
-.features {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.features li {
-  padding: 0.5rem 0;
-  position: relative;
-  padding-left: 1.5rem;
-  color: #444;
-}
-
-.features li::before {
-  content: "✓";
-  color: #2ecc71;
-  position: absolute;
-  left: 0;
-  font-weight: bold;
-}
-
 .app-footer {
   text-align: center;
   padding: 1.5rem;
@@ -219,27 +120,4 @@ main {
   border-top: 1px solid #e9ecef;
   color: #6c757d;
   font-size: 0.9rem;
-}
-
-@media (max-width: 768px) {
-  .parameter {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-  }
-  
-  .param-name {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  
-  .param-type {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  
-  .param-desc {
-    grid-column: 1;
-    grid-row: 3;
-    margin-top: 0.5rem;
-  }
 }
