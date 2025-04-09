@@ -26,11 +26,14 @@
   }
 }
 
+/* Удаляем анимацию для React иконки */
+/* 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
+*/
 
 .app-container {
   display: flex;
@@ -42,25 +45,48 @@
 
 .app-header {
   padding: 2rem 1rem;
-  text-align: center;
   background-color: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.logos {
+.header-content {
   display: flex;
+  flex-direction: row;
+  align-items: start;
   justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header-text {
+  text-align: left;
+  flex: 1;
+}
+
+.hook-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tech-logos {
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
 }
 
 .logo {
-  height: 8em;
-  padding: 1em;
+  height: 3em;
+  padding: 0.5em;
   will-change: filter;
   transition: filter 300ms;
 }
@@ -120,4 +146,65 @@ main {
   border-top: 1px solid #e9ecef;
   color: #6c757d;
   font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.github-link a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.github-link a:hover {
+  color: #3498db;
+}
+
+.github-link svg {
+  transition: transform 0.3s;
+}
+
+.github-link a:hover svg {
+  transform: rotate(360deg);
+}
+
+.sync-scroll-logo {
+  margin: 1rem 0;
+}
+
+.sync-logo {
+  height: 120px;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .header-right {
+    align-items: center;
+  }
+  
+  .header-text {
+    text-align: center;
+  }
+  
+  .tech-logos {
+    justify-content: center;
+  }
+  
+  .containers-wrapper {
+    flex-direction: column;
+  }
+  
+  .scroll-container {
+    height: 300px;
+  }
 }
