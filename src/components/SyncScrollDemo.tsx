@@ -1,9 +1,9 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useSyncScroll } from '../hooks/useSyncScroll';
-import './SyncScrollDemo.css';
+import '../styles/SyncScrollDemo.css';
 
 export const SyncScrollDemo = () => {
-  // Создаем рефы для трех контейнеров, которые будем синхронизировать
+  // Создаем рефы для трех контейнеров
   const container1Ref = useRef<HTMLDivElement>(null);
   const container2Ref = useRef<HTMLDivElement>(null);
   const container3Ref = useRef<HTMLDivElement>(null);
@@ -11,18 +11,82 @@ export const SyncScrollDemo = () => {
   // Используем наш хук для синхронизации скролла
   useSyncScroll([container1Ref, container2Ref, container3Ref]);
 
-  // Создаем элементы для каждого контейнера с разной высотой
-  const generateItems = (prefix: string, count: number, height: number, width: number) => {
+  // Отслеживаем и обновляем процентные значения для отображения
+  useEffect(() => {
+    // Функция для вычисления процентной позиции скролла
+    const updateScrollPercentages = () => {
+      [
+        { element: container1Ref.current, idPrefix: 'container1' },
+        { element: container2Ref.current, idPrefix: 'container2' },
+        { element: container3Ref.current, idPrefix: 'container3' }
+      ].forEach(({ element, idPrefix }) => {
+        if (!element) return;
+        
+        const xPercent = element.scrollWidth <= element.clientWidth 
+          ? 0 
+          : (element.scrollLeft / (element.scrollWidth - element.clientWidth)) * 100;
+          
+        const yPercent = element.scrollHeight <= element.clientHeight 
+          ? 0 
+          : (element.scrollTop / (element.scrollHeight - element.clientHeight)) * 100;
+        
+        const xPercentElement = document.getElementById(`${idPrefix}-x-percent`);
+        const yPercentElement = document.getElementById(`${idPrefix}-y-percent`);
+        
+        if (xPercentElement) {
+          xPercentElement.textContent = `${Math.round(xPercent)}%`;
+        }
+        
+        if (yPercentElement) {
+          yPercentElement.textContent = `${Math.round(yPercent)}%`;
+        }
+      });
+    };
+
+    // Добавляем слушатели событий скролла на каждый контейнер
+    const containers = [
+      container1Ref.current,
+      container2Ref.current,
+      container3Ref.current
+    ].filter(Boolean);
+
+    containers.forEach(container => {
+      if (container) {
+        container.addEventListener('scroll', updateScrollPercentages, { passive: true });
+      }
+    });
+
+    // Первичное обновление
+    updateScrollPercentages();
+
+    // Очистка при размонтировании
+    return () => {
+      containers.forEach(container => {
+        if (container) {
+          container.removeEventListener('scroll', updateScrollPercentages);
+        }
+      });
+    };
+  }, []);
+
+  // Создаем разное содержимое для каждого контейнера
+  const generateItems = (prefix: string, count: number, itemHeight: number, itemWidth: number) => {
     return Array.from({ length: count }, (_, index) => (
       <div 
         key={`${prefix}-${index}`} 
         className="scroll-item"
         style={{ 
-          height: `${height}px`,
-          width: `${width}px` 
+          height: `${itemHeight}px`,
+          width: `${itemWidth}px`,
+          backgroundColor: index % 2 === 0 
+            ? `hsl(${(index * 10) % 360}, 70%, 80%)` 
+            : `hsl(${(index * 10 + 180) % 360}, 70%, 85%)`
         }}
       >
-        {`${prefix} элемент ${index + 1}`}
+        <div className="item-content">
+          <div className="item-index">{index + 1}</div>
+          <div className="item-label">{`${prefix}`}</div>
+        </div>
       </div>
     ));
   };
@@ -31,30 +95,65 @@ export const SyncScrollDemo = () => {
     <div className="sync-scroll-demo">
       <h2>Демонстрация синхронизированного скроллинга</h2>
       
+      <div className="instructions">
+        <p>Медленно прокрутите любой из контейнеров для проверки плавности синхронизации. 
+           Обратите внимание на изменение позиций индикаторов в каждом контейнере.</p>
+      </div>
+      
       <div className="containers-wrapper">
         <div className="scroll-container-wrapper">
-          <h3>Контейнер 1</h3>
+          <h3>Широкий контейнер (300px)</h3>
           <div className="scroll-container" ref={container1Ref}>
             <div className="scroll-content">
-              {generateItems('Первый', 20, 100, 500)}
+              {generateItems('A', 30, 500, 1300)}
+            </div>
+          </div>
+          <div className="scroll-info">
+            <div className="scroll-percentage">
+              <span>X: </span>
+              <span className="percentage-value" id="container1-x-percent">0%</span>
+            </div>
+            <div className="scroll-percentage">
+              <span>Y: </span>
+              <span className="percentage-value" id="container1-y-percent">0%</span>
             </div>
           </div>
         </div>
         
         <div className="scroll-container-wrapper">
-          <h3>Контейнер 2</h3>
+          <h3>Очень широкий (500px)</h3>
           <div className="scroll-container" ref={container2Ref}>
             <div className="scroll-content">
-              {generateItems('Второй', 20, 60, 900)}
+              {generateItems('B', 30, 60, 500)}
+            </div>
+          </div>
+          <div className="scroll-info">
+            <div className="scroll-percentage">
+              <span>X: </span>
+              <span className="percentage-value" id="container2-x-percent">0%</span>
+            </div>
+            <div className="scroll-percentage">
+              <span>Y: </span>
+              <span className="percentage-value" id="container2-y-percent">0%</span>
             </div>
           </div>
         </div>
         
         <div className="scroll-container-wrapper">
-          <h3>Контейнер 3</h3>
+          <h3>Средний (400px)</h3>
           <div className="scroll-container" ref={container3Ref}>
             <div className="scroll-content">
-              {generateItems('Третий', 10, 80, 1200)}
+              {generateItems('C', 30, 80, 400)}
+            </div>
+          </div>
+          <div className="scroll-info">
+            <div className="scroll-percentage">
+              <span>X: </span>
+              <span className="percentage-value" id="container3-x-percent">0%</span>
+            </div>
+            <div className="scroll-percentage">
+              <span>Y: </span>
+              <span className="percentage-value" id="container3-y-percent">0%</span>
             </div>
           </div>
         </div>
@@ -62,9 +161,8 @@ export const SyncScrollDemo = () => {
       
       <div className="description">
         <p>
-          Прокрутите любой из контейнеров по вертикали или горизонтали и наблюдайте 
-          синхронизированный скроллинг во всех трех контейнерах, несмотря на различную 
-          высоту и ширину элементов в каждом контейнере.
+          Хук <code>useSyncScroll</code> обеспечивает плавную синхронизацию скроллинга между 
+          элементами разных размеров как по горизонтальной, так и по вертикальной оси.
         </p>
       </div>
     </div>

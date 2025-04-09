@@ -1,138 +1,130 @@
 import { useEffect, useRef } from 'react';
 
 // Обновляем тип для работы с любыми HTML элементами
-type ElementRef = React.RefObject<HTMLElement | null> | React.RefObject<Element | null>;
+type ElementRef = React.RefObject<HTMLElement | null>;
 
 /**
- * Хук для синхронизации скроллинга между несколькими контейнерами
- * @param refs - Массив ссылок на DOM-элементы для синхронизации
+ * Хук для синхронизации скроллинга между несколькими контейнерами.
+ * Использует прямой подход к синхронизации без дополнительных абстракций.
+ * 
+ * @param refs Массив ссылок на элементы, которые нужно синхронизировать
  */
 export function useSyncScroll(refs: ElementRef[]): void {
-  // Флаг для отслеживания процесса синхронизации, чтобы избежать рекурсивных вызовов
+  // Флаг, указывающий, что идет процесс программной синхронизации
   const isScrolling = useRef(false);
-  // Сохраняем последнее положение скролла каждого элемента
-  const scrollPositions = useRef<Map<Element, { x: number; y: number }>>(new Map());
-  // ID для очистки таймаута для throttling
-  const scrollTimeoutId = useRef<number | null>(null);
+  // Сохраняем последние позиции для каждого элемента
+  const lastPositions = useRef<Map<HTMLElement, { x: number, y: number }>>(new Map());
 
   useEffect(() => {
-    const validRefs = refs.filter(ref => ref.current !== null) as { current: Element }[];
-    
-    if (validRefs.length <= 1) return; // Нет необходимости в синхронизации, если есть только один элемент
+    // Получаем действительные элементы
+    const elements = refs
+      .map(ref => ref.current)
+      .filter(Boolean) as HTMLElement[];
 
-    // Инициализация позиций скролла
-    validRefs.forEach(ref => {
-      if (ref.current) {
-        scrollPositions.current.set(ref.current, {
-          x: ref.current.scrollLeft,
-          y: ref.current.scrollTop
-        });
-      }
-    });
+    if (elements.length <= 1) return; // Нет необходимости в синхронизации, если только один элемент
 
-    // Функция для вычисления относительного положения скролла
-    const calculateRelativePosition = (
-      element: Element, 
-      scrollPosition: number,
-      scrollSize: number,
-      containerSize: number
-    ) => {
-      // Если нет скролла, возвращаем 0
-      if (scrollSize <= containerSize) return 0;
-      
-      // Относительная позиция в диапазоне [0, 1]
-      return scrollPosition / (scrollSize - containerSize);
-    };
-
-    // Обработчик события скролла
-    const handleScroll = (scrolledElement: Element) => {
-      if (isScrolling.current) return; // Предотвращаем рекурсивные вызовы
-      
-      if (scrollTimeoutId.current !== null) {
-        window.clearTimeout(scrollTimeoutId.current);
-      }
-
-      // Используем throttling для улучшения производительности
-      scrollTimeoutId.current = window.setTimeout(() => {
-        // Устанавливаем флаг, что мы в процессе синхронизации
-        isScrolling.current = true;
-
-        try {
-          // Получаем текущую позицию прокрутки и размеры элемента, который был прокручен
-          const scrollLeft = scrolledElement.scrollLeft;
-          const scrollTop = scrolledElement.scrollTop;
-          const scrollWidth = scrolledElement.scrollWidth;
-          const scrollHeight = scrolledElement.scrollHeight;
-          const clientWidth = scrolledElement.clientWidth;
-          const clientHeight = scrolledElement.clientHeight;
-
-          // Вычисляем относительное положение
-          const relativeX = calculateRelativePosition(scrolledElement, scrollLeft, scrollWidth, clientWidth);
-          const relativeY = calculateRelativePosition(scrolledElement, scrollTop, scrollHeight, clientHeight);
-
-          // Синхронизируем все остальные элементы
-          validRefs.forEach(ref => {
-            if (ref.current && ref.current !== scrolledElement) {
-              const targetElement = ref.current;
-              
-              // Вычисляем абсолютную позицию для целевого элемента на основе относительной позиции
-              const targetScrollWidth = targetElement.scrollWidth;
-              const targetScrollHeight = targetElement.scrollHeight;
-              const targetClientWidth = targetElement.clientWidth;
-              const targetClientHeight = targetElement.clientHeight;
-              
-              const targetXPosition = Math.round(relativeX * (targetScrollWidth - targetClientWidth));
-              const targetYPosition = Math.round(relativeY * (targetScrollHeight - targetClientHeight));
-
-              // Обновляем позицию прокрутки только если она изменилась
-              if (targetElement.scrollLeft !== targetXPosition) {
-                targetElement.scrollLeft = targetXPosition;
-              }
-              if (targetElement.scrollTop !== targetYPosition) {
-                targetElement.scrollTop = targetYPosition;
-              }
-              
-              // Обновляем сохраненную позицию
-              scrollPositions.current.set(targetElement, { x: targetXPosition, y: targetYPosition });
-            }
-          });
-
-          // Обновляем сохраненное положение для пролистанного элемента
-          scrollPositions.current.set(scrolledElement, { x: scrollLeft, y: scrollTop });
-        } finally {
-          // Сбрасываем флаг синхронизации
-          isScrolling.current = false;
-        }
-      }, 10); // Небольшая задержка для throttling
-    };
-
-    // Устанавливаем обработчики событий на все элементы
-    const scrollHandlers = new Map<Element, (e: Event) => void>();
-
-    validRefs.forEach(ref => {
-      if (ref.current) {
-        const element = ref.current;
-        const handler = () => handleScroll(element);
-        
-        scrollHandlers.set(element, handler);
-        element.addEventListener('scroll', handler, { passive: true });
-      }
-    });
-
-    // Очистка обработчиков при размонтировании
-    return () => {
-      validRefs.forEach(ref => {
-        if (ref.current) {
-          const handler = scrollHandlers.get(ref.current);
-          if (handler) {
-            ref.current.removeEventListener('scroll', handler);
-          }
-        }
+    // Инициализируем lastPositions для всех элементов
+    elements.forEach(element => {
+      lastPositions.current.set(element, { 
+        x: element.scrollLeft, 
+        y: element.scrollTop 
       });
+    });
+
+    // Функция для вычисления процентной позиции скролла
+    function getScrollPercentage(element: HTMLElement) {
+      // Горизонтальная процентная позиция (0 - 100)
+      const xPercent = element.scrollWidth <= element.clientWidth 
+        ? 0 
+        : (element.scrollLeft / (element.scrollWidth - element.clientWidth)) * 100;
       
-      if (scrollTimeoutId.current !== null) {
-        window.clearTimeout(scrollTimeoutId.current);
+      // Вертикальная процентная позиция (0 - 100)
+      const yPercent = element.scrollHeight <= element.clientHeight 
+        ? 0 
+        : (element.scrollTop / (element.scrollHeight - element.clientHeight)) * 100;
+      
+      return { xPercent, yPercent };
+    }
+
+    // Функция для установки позиции скролла по процентам
+    function setScrollPercentage(element: HTMLElement, { xPercent, yPercent }: { xPercent: number | null, yPercent: number | null }) {
+      // Обновляем X только если процент не null (т.е. было движение по X)
+      if (xPercent !== null && element.scrollWidth > element.clientWidth) {
+        const targetX = (xPercent / 100) * (element.scrollWidth - element.clientWidth);
+        // Устанавливаем только если реально есть разница (минимум 1px)
+        if (Math.abs(element.scrollLeft - targetX) >= 1) {
+          element.scrollLeft = targetX;
+          // Обновляем сохраненную позицию по X
+          const currentPos = lastPositions.current.get(element) || { x: 0, y: 0 };
+          lastPositions.current.set(element, { ...currentPos, x: targetX });
+        }
       }
+      
+      // Обновляем Y только если процент не null (т.е. было движение по Y)
+      if (yPercent !== null && element.scrollHeight > element.clientHeight) {
+        const targetY = (yPercent / 100) * (element.scrollHeight - element.clientHeight);
+        // Устанавливаем только если реально есть разница (минимум 1px)
+        if (Math.abs(element.scrollTop - targetY) >= 1) {
+          element.scrollTop = targetY;
+          // Обновляем сохраненную позицию по Y
+          const currentPos = lastPositions.current.get(element) || { x: 0, y: 0 };
+          lastPositions.current.set(element, { ...currentPos, y: targetY });
+        }
+      }
+    }
+
+    // Функция синхронизации для конкретного элемента
+    function syncFromElement(sourceElement: HTMLElement) {
+      // Если уже синхронизируемся, предотвращаем рекурсию
+      if (isScrolling.current) return;
+      
+      isScrolling.current = true;
+      
+      try {
+        // Получаем последние известные позиции источника
+        const lastPos = lastPositions.current.get(sourceElement) || { x: 0, y: 0 };
+        
+        // Определяем, по какой оси произошло движение, сравнивая с предыдущей позицией
+        const movedX = Math.abs(sourceElement.scrollLeft - lastPos.x) >= 1;
+        const movedY = Math.abs(sourceElement.scrollTop - lastPos.y) >= 1;
+        
+        // Получаем новые процентные позиции источника
+        const { xPercent, yPercent } = getScrollPercentage(sourceElement);
+        
+        // Обновляем сохраненную позицию для источника
+        lastPositions.current.set(sourceElement, { 
+          x: sourceElement.scrollLeft, 
+          y: sourceElement.scrollTop 
+        });
+        
+        // Применяем проценты ко всем остальным элементам, только по тем осям, по которым было движение
+        elements.forEach(element => {
+          if (element !== sourceElement) {
+            setScrollPercentage(element, { 
+              xPercent: movedX ? xPercent : null, 
+              yPercent: movedY ? yPercent : null 
+            });
+          }
+        });
+      } finally {
+        // Всегда сбрасываем флаг, даже при ошибках
+        isScrolling.current = false;
+      }
+    }
+    
+    // Создаем обработчики событий скролла для каждого элемента
+    const handlers = elements.map(element => {
+      const handler = () => syncFromElement(element);
+      element.addEventListener('scroll', handler, { passive: true });
+      return { element, handler };
+    });
+
+    // Очистка при размонтировании
+    return () => {
+      handlers.forEach(({ element, handler }) => {
+        element.removeEventListener('scroll', handler);
+      });
+      lastPositions.current.clear();
     };
-  }, [refs]); // Пересоздаем эффект при изменении refs
+  }, [refs]); // Пересоздаем эффект только при изменении ссылок
 } 
